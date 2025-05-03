@@ -8,7 +8,9 @@ import '../models/message.dart';
 
 class ChatDetailScreen extends GetView<ChatDetailController> {
   final AuthController _authController = Get.find<AuthController>();
-  
+
+  ChatDetailScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,28 +20,31 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
           children: [
             // Header
             _buildHeader(),
-            
+
             // Chat messages area
-            Expanded(
-              child: _buildChatMessages(),
-            ),
-            
+            Expanded(child: _buildChatMessages()),
+
             // Typing indicator
-            Obx(() => controller.isTyping.value
-              ? Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Typing...',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                )
-              : SizedBox.shrink()
+            Obx(
+              () =>
+                  controller.isTyping.value
+                      ? Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Typing...',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      )
+                      : SizedBox.shrink(),
             ),
-            
+
             // Message input field
             _buildMessageInput(),
           ],
@@ -47,12 +52,12 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
       ),
     );
   }
-  
+
   Widget _buildHeader() {
     return Obx(() {
       final chat = controller.chat.value;
       final otherUser = chat?.otherUser;
-      
+
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
@@ -75,7 +80,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               constraints: BoxConstraints(),
             ),
             SizedBox(width: 12),
-            
+
             // Profile image
             CircleAvatar(
               radius: 20,
@@ -89,7 +94,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               ),
             ),
             SizedBox(width: 12),
-            
+
             // Name and status
             Expanded(
               child: Column(
@@ -98,10 +103,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                 children: [
                   Text(
                     otherUser?.displayName ?? 'Loading...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   Text(
                     otherUser?.isOnline == true ? 'Active' : 'Offline',
@@ -119,13 +121,13 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
       );
     });
   }
-  
+
   Widget _buildChatMessages() {
     return Obx(() {
       if (controller.isLoading.value && controller.messages.isEmpty) {
         return Center(child: CircularProgressIndicator());
       }
-      
+
       return NotificationListener<ScrollNotification>(
         onNotification: (scrollInfo) {
           // Load more messages when reaching the top
@@ -139,11 +141,12 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
         child: ListView.builder(
           reverse: true,
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          itemCount: controller.messages.length + 
-                     (controller.isLoadingMore.value ? 1 : 0),
+          itemCount:
+              controller.messages.length +
+              (controller.isLoadingMore.value ? 1 : 0),
           itemBuilder: (context, index) {
             // Show loading indicator at the end when loading more
-            if (controller.isLoadingMore.value && 
+            if (controller.isLoadingMore.value &&
                 index == controller.messages.length) {
               return Center(
                 child: Padding(
@@ -152,23 +155,24 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                 ),
               );
             }
-            
+
             final message = controller.messages[index];
-            final isMyMessage = message.senderId == 
-                                _authController.currentUser.value!.id;
-            
+            final isMyMessage =
+                message.senderId == _authController.currentUser.value!.id;
+
             return Padding(
               padding: EdgeInsets.only(bottom: 16),
-              child: isMyMessage
-                  ? _buildMyMessage(message)
-                  : _buildTheirMessage(message),
+              child:
+                  isMyMessage
+                      ? _buildMyMessage(message)
+                      : _buildTheirMessage(message),
             );
           },
         ),
       );
     });
   }
-  
+
   Widget _buildMyMessage(Message message) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -194,10 +198,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               SizedBox(height: 4),
               Text(
                 DateFormat('HH:mm').format(message.createdAt),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 10, color: Colors.black54),
               ),
             ],
           ),
@@ -205,7 +206,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
       ],
     );
   }
-  
+
   Widget _buildTheirMessage(Message message) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -231,10 +232,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               SizedBox(height: 4),
               Text(
                 DateFormat('HH:mm').format(message.createdAt),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 10, color: Colors.black54),
               ),
             ],
           ),
@@ -242,7 +240,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
       ],
     );
   }
-  
+
   Widget _buildMessageInput() {
     return Container(
       padding: EdgeInsets.all(16.0),
@@ -306,11 +304,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                 color: Color(0xFF6C88D7),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.send,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: Icon(Icons.send, color: Colors.white, size: 20),
             ),
           ),
         ],

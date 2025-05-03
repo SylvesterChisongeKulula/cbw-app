@@ -10,28 +10,30 @@ import 'controllers/auth_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize services
   await initServices();
-  
+
   runApp(MyApp());
 }
 
 Future<void> initServices() async {
   // Initialize storage service
   await Get.putAsync(() => StorageService().init());
-  
+
   // Initialize API service
   Get.put(ApiService());
-  
+
   // Initialize Socket service (will connect after user login)
   Get.put(SocketService());
-  
+
   // Initialize auth controller
   Get.put(AuthController());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Set system overlay style for status bar
@@ -41,7 +43,7 @@ class MyApp extends StatelessWidget {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-    
+
     return GetMaterialApp(
       title: 'CBW Chat',
       debugShowCheckedModeBanner: false,

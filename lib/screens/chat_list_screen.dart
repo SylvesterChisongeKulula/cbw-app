@@ -1,5 +1,4 @@
 // lib/screens/chat_list_screen.dart
-import 'package:cbw_app/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +9,9 @@ import '../routes/app_routes.dart';
 
 class ChatListScreen extends GetView<ChatListController> {
   final AuthController _authController = Get.find<AuthController>();
-  
+
+  ChatListScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +21,10 @@ class ChatListScreen extends GetView<ChatListController> {
           // Header with safe area for notch
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -40,7 +44,8 @@ class ChatListScreen extends GetView<ChatListController> {
                         radius: 16,
                         backgroundColor: Color(0xFF6C88D7),
                         child: Text(
-                          user?.displayName.substring(0, 1).toUpperCase() ?? 'U',
+                          user?.displayName.substring(0, 1).toUpperCase() ??
+                              'U',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -53,20 +58,24 @@ class ChatListScreen extends GetView<ChatListController> {
               ),
             ),
           ),
-          
+
           // Chat list
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value && controller.chats.isEmpty) {
                 return Center(child: CircularProgressIndicator());
               }
-              
+
               if (controller.chats.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.chat_bubble_outline, size: 80, color: Colors.grey[300]),
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 80,
+                        color: Colors.grey[300],
+                      ),
                       SizedBox(height: 16),
                       Text(
                         'No conversations yet',
@@ -79,16 +88,13 @@ class ChatListScreen extends GetView<ChatListController> {
                       SizedBox(height: 8),
                       Text(
                         'Start a new chat by tapping the + button',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                       ),
                     ],
                   ),
                 );
               }
-              
+
               return RefreshIndicator(
                 onRefresh: controller.refreshChats,
                 child: ListView.builder(
@@ -110,15 +116,15 @@ class ChatListScreen extends GetView<ChatListController> {
       ),
     );
   }
-  
+
   Widget _buildChatItem(Chat chat) {
     final otherUser = chat.otherUser;
     final lastMessage = chat.lastMessage;
-    
+
     if (otherUser == null) {
       return SizedBox.shrink();
     }
-    
+
     return InkWell(
       onTap: () => Get.toNamed('${AppRoutes.CHAT_DETAIL}/${chat.id}'),
       child: Container(
@@ -139,7 +145,7 @@ class ChatListScreen extends GetView<ChatListController> {
               ),
             ),
             SizedBox(width: 16),
-            
+
             // Message details
             Expanded(
               child: Column(
@@ -169,7 +175,8 @@ class ChatListScreen extends GetView<ChatListController> {
                   SizedBox(height: 4),
                   Text(
                     lastMessage != null
-                        ? (lastMessage.senderId == _authController.currentUser.value!.id
+                        ? (lastMessage.senderId ==
+                                _authController.currentUser.value!.id
                             ? 'You: ${lastMessage.content}'
                             : lastMessage.content)
                         : 'Start a conversation',
@@ -183,19 +190,14 @@ class ChatListScreen extends GetView<ChatListController> {
                 ],
               ),
             ),
-            
+
             // Time and unread count
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  lastMessage != null
-                      ? _formatTime(lastMessage.createdAt)
-                      : '',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
+                  lastMessage != null ? _formatTime(lastMessage.createdAt) : '',
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
                 SizedBox(height: 4),
                 if (chat.unreadCount > 0)
@@ -221,13 +223,13 @@ class ChatListScreen extends GetView<ChatListController> {
       ),
     );
   }
-  
+
   String _formatTime(DateTime time) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(Duration(days: 1));
     final messageDate = DateTime(time.year, time.month, time.day);
-    
+
     if (messageDate == today) {
       return DateFormat('HH:mm').format(time);
     } else if (messageDate == yesterday) {
@@ -236,7 +238,7 @@ class ChatListScreen extends GetView<ChatListController> {
       return DateFormat('dd/MM').format(time);
     }
   }
-  
+
   void _showProfileOptions(BuildContext context) {
     Get.bottomSheet(
       Container(
@@ -268,13 +270,11 @@ class ChatListScreen extends GetView<ChatListController> {
       ),
     );
   }
-  
+
   void _showNewChatDialog(BuildContext context) {
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
@@ -282,10 +282,7 @@ class ChatListScreen extends GetView<ChatListController> {
             children: [
               Text(
                 'Start a new chat',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
               FutureBuilder(
@@ -294,26 +291,31 @@ class ChatListScreen extends GetView<ChatListController> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  
+
                   if (snapshot.hasError) {
                     return Text('Error loading users');
                   }
-                  
-                  final users = snapshot.data as List<User>?;
+
+                  final users = snapshot.data;
                   if (users == null || users.isEmpty) {
                     return Text('No users found');
                   }
-                  
+
                   // Filter out current user
-                  final filteredUsers = users.where((user) => 
-                    user.id != _authController.currentUser.value!.id
-                  ).toList();
-                  
+                  final filteredUsers =
+                      users
+                          .where(
+                            (user) =>
+                                user.id !=
+                                _authController.currentUser.value!.id,
+                          )
+                          .toList();
+
                   if (filteredUsers.isEmpty) {
                     return Text('No other users found');
                   }
-                  
-                  return Container(
+
+                  return SizedBox(
                     height: 300,
                     child: ListView.builder(
                       shrinkWrap: true,

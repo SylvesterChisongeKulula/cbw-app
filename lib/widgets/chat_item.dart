@@ -8,22 +8,18 @@ import 'package:get/get.dart';
 class ChatItem extends StatelessWidget {
   final Chat chat;
   final int currentUserId;
-  
-  const ChatItem({
-    Key? key,
-    required this.chat,
-    required this.currentUserId,
-  }) : super(key: key);
-  
+
+  const ChatItem({super.key, required this.chat, required this.currentUserId});
+
   @override
   Widget build(BuildContext context) {
     final otherUser = chat.otherUser;
     final lastMessage = chat.lastMessage;
-    
+
     if (otherUser == null) {
       return SizedBox.shrink();
     }
-    
+
     return InkWell(
       onTap: () => Get.toNamed('${AppRoutes.CHAT_DETAIL}/${chat.id}'),
       child: Container(
@@ -44,7 +40,7 @@ class ChatItem extends StatelessWidget {
               ),
             ),
             SizedBox(width: 16),
-            
+
             // Message details
             Expanded(
               child: Column(
@@ -88,7 +84,7 @@ class ChatItem extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Time and unread count
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -97,10 +93,7 @@ class ChatItem extends StatelessWidget {
                   lastMessage != null
                       ? DateFormatter.getFormattedTime(lastMessage.createdAt)
                       : '',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
                 SizedBox(height: 4),
                 if (chat.unreadCount > 0)

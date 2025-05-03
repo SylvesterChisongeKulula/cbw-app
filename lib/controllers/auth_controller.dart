@@ -1,4 +1,5 @@
 // lib/controllers/auth_controller.dart
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/user.dart';
 import '../services/api_service.dart';
@@ -10,28 +11,31 @@ class AuthController extends GetxController {
   final ApiService _apiService = Get.find<ApiService>();
   final StorageService _storageService = Get.find<StorageService>();
   final SocketService _socketService = Get.find<SocketService>();
-  
+
   final Rx<User?> currentUser = Rx<User?>(null);
   final RxList<User> users = RxList<User>([]);
   final RxBool isLoading = false.obs;
-  
+
   @override
   void onInit() {
     super.onInit();
     _loadCurrentUser();
     _loadUsers();
   }
-  
+
   // Load current user from storage
   void _loadCurrentUser() {
     final user = _storageService.getCurrentUser();
     if (user != null) {
       currentUser.value = user;
       _connectSocket(user.id);
-      Get.offAllNamed(AppRoutes.CHAT_LIST);
+      // Add a small delay to ensure GetX is fully initialized
+      Future.delayed(Duration(milliseconds: 100), () {
+        Get.offAllNamed(AppRoutes.CHAT_LIST);
+      });
     }
   }
-  
+
   // Load all users from API
   Future<void> _loadUsers() async {
     try {
@@ -43,7 +47,7 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-  
+
   // Create a new user
   Future<void> createUser(String username, String displayName) async {
     try {
@@ -64,10 +68,10 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       final usersList = await _apiService.getAllUsers();
-      
+
       // Update the users list in memory
       users.value = usersList;
-      
+
       return usersList;
     } catch (e) {
       print('Error loading users: $e');
@@ -77,7 +81,7 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-  
+
   // Select a user from the list
   Future<void> selectUser(User user) async {
     await _storageService.saveCurrentUser(user);
@@ -85,12 +89,12 @@ class AuthController extends GetxController {
     _connectSocket(user.id);
     Get.offAllNamed(AppRoutes.CHAT_LIST);
   }
-  
+
   // Connect to socket with user ID
   void _connectSocket(int userId) {
     _socketService.init(userId);
   }
-  
+
   // Logout current user
   Future<void> logout() async {
     _socketService.disconnect();
@@ -99,4 +103,3 @@ class AuthController extends GetxController {
     Get.offAllNamed(AppRoutes.LOGIN);
   }
 }
-

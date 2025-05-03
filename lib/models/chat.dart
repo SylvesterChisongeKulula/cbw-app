@@ -27,7 +27,7 @@ class Chat {
       user1Id: json['user1Id'],
       user2Id: json['user2Id'],
       otherUser: json['otherUser'] != null ? User.fromJson(json['otherUser']) : null,
-      lastMessage: json['lastMessage'] != null ? Message.fromJson(json['lastMessage']) : null,
+      lastMessage: json['latestMessage'] != null ? Message.fromJson(json['latestMessage']) : null,
       unreadCount: json['unreadCount'] ?? 0,
       createdAt: DateTime.parse(json['createdAt']),
     );

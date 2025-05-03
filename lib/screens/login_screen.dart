@@ -8,7 +8,9 @@ class LoginScreen extends StatelessWidget {
   final AuthController _authController = Get.find<AuthController>();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _displayNameController = TextEditingController();
-  
+
+  LoginScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,25 +32,22 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(
                 'Select an existing account or create a new one',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.black54),
               ),
               SizedBox(height: 40),
-              
+
               // Existing users list
               Obx(() {
                 if (_authController.isLoading.value) {
                   return Center(child: CircularProgressIndicator());
                 }
-                
+
                 if (_authController.users.isEmpty) {
                   return Center(
                     child: Text('No users found. Create a new account below.'),
                   );
                 }
-                
+
                 return Expanded(
                   child: ListView.builder(
                     itemCount: _authController.users.length,
@@ -59,18 +58,15 @@ class LoginScreen extends StatelessWidget {
                   ),
                 );
               }),
-              
+
               SizedBox(height: 24),
               Divider(),
               SizedBox(height: 24),
-              
+
               // Create new user form
               Text(
                 'Create New Account',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
               TextField(
@@ -94,15 +90,15 @@ class LoginScreen extends StatelessWidget {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (_usernameController.text.isEmpty || 
+                    if (_usernameController.text.isEmpty ||
                         _displayNameController.text.isEmpty) {
                       Get.snackbar(
-                        'Error', 
+                        'Error',
                         'Please enter both username and display name',
                       );
                       return;
                     }
-                    
+
                     _authController.createUser(
                       _usernameController.text.trim(),
                       _displayNameController.text.trim(),
@@ -111,12 +107,17 @@ class LoginScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF6C88D7),
                   ),
-                  child: Obx(() => _authController.isLoading.value
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Create Account',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
+                  child: Obx(
+                    () =>
+                        _authController.isLoading.value
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                              'Create Account',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                   ),
                 ),
               ),
@@ -126,7 +127,7 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildUserItem(User user) {
     return ListTile(
       leading: CircleAvatar(

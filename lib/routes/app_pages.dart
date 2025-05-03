@@ -11,10 +11,7 @@ import 'app_routes.dart';
 
 class AppPages {
   static final routes = [
-    GetPage(
-      name: AppRoutes.SPLASH,
-      page: () => SplashScreen(),
-    ),
+    GetPage(name: AppRoutes.SPLASH, page: () => SplashScreen()),
     GetPage(
       name: AppRoutes.LOGIN,
       page: () => LoginScreen(),
@@ -30,7 +27,7 @@ class AppPages {
       }),
     ),
     GetPage(
-      name: AppRoutes.CHAT_DETAIL + '/:id',
+      name: '${AppRoutes.CHAT_DETAIL}/:id',
       page: () => ChatDetailScreen(),
       binding: BindingsBuilder(() {
         Get.lazyPut<ChatDetailController>(() => ChatDetailController());

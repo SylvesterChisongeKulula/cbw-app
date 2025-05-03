@@ -2,15 +2,16 @@
 import 'package:flutter/material.dart';
 
 class TypingIndicator extends StatefulWidget {
-  const TypingIndicator({Key? key}) : super(key: key);
+  const TypingIndicator({super.key});
 
   @override
   _TypingIndicatorState createState() => _TypingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProviderStateMixin {
+class _TypingIndicatorState extends State<TypingIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  
+
   @override
   void initState() {
     super.initState();
@@ -19,13 +20,13 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
       duration: Duration(milliseconds: 1200),
     )..repeat();
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
@@ -51,13 +52,12 @@ class _TypingIndicatorState extends State<TypingIndicator> with SingleTickerProv
       },
     );
   }
-  
+
   Widget _buildDot(double delay) {
     final double delayedValue = ((_controller.value + delay) % 1.0);
-    final double opacityValue = (delayedValue < 0.5)
-        ? delayedValue * 2
-        : (1.0 - delayedValue) * 2;
-    
+    final double opacityValue =
+        (delayedValue < 0.5) ? delayedValue * 2 : (1.0 - delayedValue) * 2;
+
     return Opacity(
       opacity: 0.3 + (opacityValue * 0.7),
       child: Container(

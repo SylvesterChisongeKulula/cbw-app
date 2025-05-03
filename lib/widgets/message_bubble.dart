@@ -6,13 +6,9 @@ import '../utils/date_formatter.dart';
 class MessageBubble extends StatelessWidget {
   final Message message;
   final bool isMe;
-  
-  const MessageBubble({
-    Key? key,
-    required this.message,
-    required this.isMe,
-  }) : super(key: key);
-  
+
+  const MessageBubble({super.key, required this.message, required this.isMe});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -28,7 +24,8 @@ class MessageBubble extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
           ),
           child: Column(
-            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment:
+                isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
               Text(
                 message.content,
@@ -41,10 +38,7 @@ class MessageBubble extends StatelessWidget {
               SizedBox(height: 4),
               Text(
                 DateFormatter.getMessageTime(message.createdAt),
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 10, color: Colors.black54),
               ),
             ],
           ),
@@ -53,4 +47,3 @@ class MessageBubble extends StatelessWidget {
     );
   }
 }
-

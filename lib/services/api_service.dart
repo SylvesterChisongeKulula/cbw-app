@@ -59,8 +59,10 @@ class ApiService extends GetxService {
 
   // User APIs
   Future<List<User>> getAllUsers() async {
-    final data = await _get('/users');
-    return List<User>.from(data.map((user) => User.fromJson(user)));
+    final response = await _get('/users');
+    // Extract the data array from the response
+    final List<dynamic> usersData = response['data'];
+    return List<User>.from(usersData.map((user) => User.fromJson(user)));
   }
 
   Future<User> getUserById(int userId) async {
@@ -78,16 +80,17 @@ class ApiService extends GetxService {
 
   // Chat APIs
   Future<Chat> createChat(int user1Id, int user2Id) async {
-    final data = await _post('/chats', {
+    final response = await _post('/chats', {
       'user1Id': user1Id,
       'user2Id': user2Id,
     });
-    return Chat.fromJson(data);
+    return Chat.fromJson(response['data']);
   }
 
   Future<List<Chat>> getUserChats(int userId) async {
-    final data = await _get('/chats/user/$userId');
-    return List<Chat>.from(data.map((chat) => Chat.fromJson(chat)));
+    final response = await _get('/chats/user/$userId');
+    final List<dynamic> chatsData = response['data'];
+    return List<Chat>.from(chatsData.map((chat) => Chat.fromJson(chat)));
   }
 
   Future<Chat> getChatById(int chatId) async {
