@@ -18,12 +18,13 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'],
-      chatId: json['chatId'],
-      senderId: json['senderId'],
-      content: json['content'],
-      createdAt: DateTime.parse(json['createdAt']),
-      isRead: json['isRead'] ?? false,
+      id: json['id'] ?? 0,
+      content: json['content'] ?? '',
+      senderId: json['senderId'] ?? 0, // This is likely the issue
+      chatId: json['chatId'] ?? 0,     // This could also be null
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt']) 
+          : DateTime.now(),
     );
   }
 

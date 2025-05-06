@@ -122,6 +122,8 @@ class ChatDetailController extends GetxController {
   // Send a message
   void sendMessage() {
     if (messageText.value.trim().isEmpty) return;
+
+    print('Sending message: ${messageText.value.trim()}');
     
     _socketService.sendMessage(
       chatId.value,

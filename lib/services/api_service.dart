@@ -60,8 +60,11 @@ class ApiService extends GetxService {
   // User APIs
   Future<List<User>> getAllUsers() async {
     final response = await _get('/users');
+    // Debug print to see the raw response
+    
     // Extract the data array from the response
     final List<dynamic> usersData = response['data'];
+    
     return List<User>.from(usersData.map((user) => User.fromJson(user)));
   }
 
@@ -88,9 +91,28 @@ class ApiService extends GetxService {
   }
 
   Future<List<Chat>> getUserChats(int userId) async {
-    final response = await _get('/chats/user/$userId');
-    final List<dynamic> chatsData = response['data'];
-    return List<Chat>.from(chatsData.map((chat) => Chat.fromJson(chat)));
+    try {
+      final response = await _get('/chats/user/$userId');
+      
+      final List<dynamic> chatsData = response['data'];
+      print('Extracted chats data: $chatsData');
+      
+      List<Chat> chatsList = [];
+      for (var chat in chatsData) {
+        try {
+          print('Processing chat: $chat');
+          chatsList.add(Chat.fromJson(chat));
+        } catch (e) {
+          print('Error parsing chat: $e');
+          // Continue with next chat instead of failing the whole list
+        }
+      }
+      
+      return chatsList;
+    } catch (e) {
+      print('Error in getUserChats: $e');
+      throw Exception('Failed to get user chats: $e');
+    }
   }
 
   Future<Chat> getChatById(int chatId) async {
@@ -100,9 +122,24 @@ class ApiService extends GetxService {
 
   // Message APIs
   Future<List<Message>> getChatMessages(int chatId, {int limit = 50, int page = 1}) async {
-    final data = await _get('/chats/$chatId/messages?limit=$limit&page=$page');
-    return List<Message>.from(data['messages'].map((message) => Message.fromJson(message)));
+    try {
+      final data = await _get('/chats/$chatId/messages?limit=$limit&page=$page');
+      
+      // Debug the response structure
+      print('Chat messages response: $data');
+      
+      // Check if data and data['data'] and data['data']['messages'] exist
+      if (data == null || data['data'] == null || data['data']['messages'] == null) {
+        print('Invalid response structure for chat messages');
+        return [];
+      }
+      
+      final List<dynamic> messagesData = data['data']['messages'];
+      return List<Message>.from(messagesData.map((message) => Message.fromJson(message)));
+    } catch (e) {
+      print('Error in getChatMessages: $e');
+      throw Exception('Failed to get chat messages: $e');
+    }
   }
 }
-
 

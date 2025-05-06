@@ -62,6 +62,8 @@ class ChatListScreen extends GetView<ChatListController> {
           // Chat list
           Expanded(
             child: Obx(() {
+              print('Chat list UI update - ${controller.chats.length} chats, isLoading: ${controller.isLoading.value}');
+              
               if (controller.isLoading.value && controller.chats.isEmpty) {
                 return Center(child: CircularProgressIndicator());
               }
@@ -101,6 +103,7 @@ class ChatListScreen extends GetView<ChatListController> {
                   itemCount: controller.chats.length,
                   itemBuilder: (context, index) {
                     final chat = controller.chats[index];
+                    print('Building chat item for chat ${chat.id}');
                     return _buildChatItem(chat);
                   },
                 ),

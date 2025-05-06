@@ -22,14 +22,18 @@ class Chat {
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
+    // Print the full JSON for debugging
+    print('Parsing chat JSON: $json');
+    
     return Chat(
-      id: json['id'],
-      user1Id: json['user1Id'],
-      user2Id: json['user2Id'],
+      id: json['id'] ?? 0,
+      // These fields might be missing in the API response
+      user1Id: json['user1Id'] ?? 0,
+      user2Id: json['user2Id'] ?? 0,
       otherUser: json['otherUser'] != null ? User.fromJson(json['otherUser']) : null,
       lastMessage: json['latestMessage'] != null ? Message.fromJson(json['latestMessage']) : null,
       unreadCount: json['unreadCount'] ?? 0,
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
     );
   }
 

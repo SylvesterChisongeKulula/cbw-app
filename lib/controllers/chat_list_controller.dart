@@ -26,10 +26,20 @@ class ChatListController extends GetxController {
   Future<void> loadChats() async {
     try {
       isLoading.value = true;
-      chats.value = await _apiService.getUserChats(currentUser.id);
-      chats.sort((a, b) => (b.lastMessage?.createdAt ?? b.createdAt)
-          .compareTo(a.lastMessage?.createdAt ?? a.createdAt));
+      final chatsList = await _apiService.getUserChats(currentUser.id);
+      print('Loaded ${chatsList.length} chats from API');
+      
+      // Make sure to update the observable list properly
+      chats.clear();
+      chats.addAll(chatsList);
+            
+      // Sort chats by latest message
+      if (chats.isNotEmpty) {
+        chats.sort((a, b) => (b.lastMessage?.createdAt ?? b.createdAt)
+            .compareTo(a.lastMessage?.createdAt ?? a.createdAt));
+      }
     } catch (e) {
+      print('Error loading chats: $e');
       Get.snackbar('Error', 'Failed to load chats: $e');
     } finally {
       isLoading.value = false;
