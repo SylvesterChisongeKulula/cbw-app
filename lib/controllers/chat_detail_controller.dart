@@ -120,19 +120,33 @@ class ChatDetailController extends GetxController {
   }
   
   // Send a message
-  void sendMessage() {
+  Future<void> sendMessage() async {
     if (messageText.value.trim().isEmpty) return;
 
-    print('Sending message: ${messageText.value.trim()}');
+    final content = messageText.value.trim();
     
+    // Create a temporary message to show immediately in UI
+    final tempMessage = Message(
+      id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
+      chatId: chatId.value,
+      senderId: currentUser.id,
+      content: content,
+      createdAt: DateTime.now(),
+      isRead: false,
+    );
+    
+    // Add to messages list immediately for UI update
+    messages.add(tempMessage);
+    
+    // Clear message text before sending to socket
+    messageText.value = '';
+    
+    // Send via socket
     _socketService.sendMessage(
       chatId.value,
       currentUser.id,
-      messageText.value.trim(),
+      content,
     );
-    
-    // Clear message text
-    messageText.value = '';
     
     // Reset typing indicator
     _stopTyping();

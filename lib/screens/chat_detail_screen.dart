@@ -257,6 +257,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: TextEditingController(text: controller.messageText.value),
                       onChanged: controller.onTyping,
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -296,7 +297,9 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
           ),
           SizedBox(width: 8),
           GestureDetector(
-            onTap: controller.sendMessage,
+            onTap: () async {
+              await controller.sendMessage();
+            },
             child: Container(
               width: 50,
               height: 50,

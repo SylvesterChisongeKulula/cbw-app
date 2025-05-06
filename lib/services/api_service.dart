@@ -61,6 +61,8 @@ class ApiService extends GetxService {
   Future<List<User>> getAllUsers() async {
     final response = await _get('/users');
     // Debug print to see the raw response
+
+    print('Raw response: $response');
     
     // Extract the data array from the response
     final List<dynamic> usersData = response['data'];
