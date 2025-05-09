@@ -16,11 +16,11 @@ class ChatListScreen extends GetView<ChatListController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // Header with safe area for notch
-          SafeArea(
-            child: Padding(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 12.0,
@@ -44,8 +44,7 @@ class ChatListScreen extends GetView<ChatListController> {
                         radius: 16,
                         backgroundColor: Color(0xFF6C88D7),
                         child: Text(
-                          user?.displayName.substring(0, 1).toUpperCase() ??
-                              'U',
+                          (user?.displayName.isNotEmpty == true ? user!.displayName.substring(0, 1).toUpperCase() : 'U'),
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -57,60 +56,60 @@ class ChatListScreen extends GetView<ChatListController> {
                 ],
               ),
             ),
-          ),
 
-          // Chat list
-          Expanded(
-            child: Obx(() {
-              print('Chat list UI update - ${controller.chats.length} chats, isLoading: ${controller.isLoading.value}');
-              
-              if (controller.isLoading.value && controller.chats.isEmpty) {
-                return Center(child: CircularProgressIndicator());
-              }
+            // Chat list
+            Expanded(
+              child: Obx(() {
+                print('Chat list UI update - ${controller.chats.length} chats, isLoading: ${controller.isLoading.value}');
+                
+                if (controller.isLoading.value && controller.chats.isEmpty) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-              if (controller.chats.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        size: 80,
-                        color: Colors.grey[300],
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'No conversations yet',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
+                if (controller.chats.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 80,
+                          color: Colors.grey[300],
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Start a new chat by tapping the + button',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                      ),
-                    ],
+                        SizedBox(height: 16),
+                        Text(
+                          'No conversations yet',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Start a new chat by tapping the + button',
+                          style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: controller.refreshChats,
+                  child: ListView.builder(
+                    itemCount: controller.chats.length,
+                    itemBuilder: (context, index) {
+                      final chat = controller.chats[index];
+                      print('Building chat item for chat ${chat.id}');
+                      return _buildChatItem(chat);
+                    },
                   ),
                 );
-              }
-
-              return RefreshIndicator(
-                onRefresh: controller.refreshChats,
-                child: ListView.builder(
-                  itemCount: controller.chats.length,
-                  itemBuilder: (context, index) {
-                    final chat = controller.chats[index];
-                    print('Building chat item for chat ${chat.id}');
-                    return _buildChatItem(chat);
-                  },
-                ),
-              );
-            }),
-          ),
-        ],
+              }),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showNewChatDialog(context),
