@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import '../models/chat.dart';
 import '../models/user.dart';
+import '../models/message.dart';
 import '../services/api_service.dart';
 import '../services/socket_service.dart';
 import 'auth_controller.dart';
@@ -35,8 +36,8 @@ class ChatListController extends GetxController {
             
       // Sort chats by latest message
       if (chats.isNotEmpty) {
-        chats.sort((a, b) => (b.lastMessage?.createdAt ?? b.createdAt)
-            .compareTo(a.lastMessage?.createdAt ?? a.createdAt));
+        chats.sort((a, b) => (a.lastMessage?.createdAt ?? a.createdAt)
+            .compareTo(b.lastMessage?.createdAt ?? b.createdAt));
       }
     } catch (e) {
       print('Error loading chats: $e');
@@ -67,8 +68,8 @@ class ChatListController extends GetxController {
         chats[existingIndex] = chat;
       } else {
         chats.add(chat);
-        chats.sort((a, b) => (b.lastMessage?.createdAt ?? b.createdAt)
-            .compareTo(a.lastMessage?.createdAt ?? a.createdAt));
+        chats.sort((a, b) => (a.lastMessage?.createdAt ?? a.createdAt)
+            .compareTo(b.lastMessage?.createdAt ?? b.createdAt));
       }
       
       // Navigate to chat detail screen
@@ -87,11 +88,14 @@ class ChatListController extends GetxController {
       }
     });
     
-    // Listen for user status changes
-    _socketService.onUserStatusChange((data) {
-      if (data != null) {
-        _updateUserStatus(data);
-      }
+    // Listen for user online/offline events
+    _socketService.onUserOnline((data) {
+      print('Socket event user:online: $data');
+      if (data != null) _updateUserStatus(data);
+    });
+    _socketService.onUserOffline((data) {
+      print('Socket event user:offline: $data');
+      if (data != null) _updateUserStatus(data);
     });
   }
   
@@ -103,13 +107,23 @@ class ChatListController extends GetxController {
       final chatIndex = chats.indexWhere((c) => c.id == chatId);
       
       if (chatIndex >= 0) {
-        // Update last message and move chat to top
-        final updatedChat = Chat.fromJson(messageData['chat']);
+        // Update lastMessage using the incoming messageData
+        final existing = chats[chatIndex];
+        final newMessage = Message.fromJson(messageData);
+        final updatedChat = Chat(
+          id: existing.id,
+          user1Id: existing.user1Id,
+          user2Id: existing.user2Id,
+          otherUser: existing.otherUser,
+          lastMessage: newMessage,
+          unreadCount: existing.unreadCount + (messageData['senderId'] != currentUser.id ? 1 : 0),
+          createdAt: existing.createdAt,
+        );
         chats[chatIndex] = updatedChat;
         
         // Sort chats by latest message
-        chats.sort((a, b) => (b.lastMessage?.createdAt ?? b.createdAt)
-            .compareTo(a.lastMessage?.createdAt ?? a.createdAt));
+        chats.sort((a, b) => (a.lastMessage?.createdAt ?? a.createdAt)
+            .compareTo(b.lastMessage?.createdAt ?? b.createdAt));
       }
     } catch (e) {
       print('Error updating chat with new message: $e');
@@ -145,6 +159,9 @@ class ChatListController extends GetxController {
           );
         }
       }
+      // Refresh to ensure UI updates
+      chats.refresh();
+      print('Chat list after status update: ${chats.map((c) => c.otherUser?.id != null ? '${c.id}:${c.otherUser!.isOnline}' : '').toList()}');
     } catch (e) {
       print('Error updating user status: $e');
     }

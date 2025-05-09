@@ -8,55 +8,60 @@ import '../models/message.dart';
 
 class ChatDetailScreen extends GetView<ChatDetailController> {
   final AuthController _authController = Get.find<AuthController>();
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   ChatDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              _buildHeader(),
 
-            // Chat messages area
-            Expanded(child: _buildChatMessages()),
+              // Chat messages area
+              Expanded(child: _buildChatMessages()),
 
-            // Typing indicator
-            Obx(
-              () =>
-                  controller.isTyping.value
-                      ? Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Typing...',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontStyle: FontStyle.italic,
+              // Typing indicator
+              Obx(
+                () =>
+                    controller.isTyping.value
+                        ? Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
                           ),
-                        ),
-                      )
-                      : SizedBox.shrink(),
-            ),
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Typing...',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        )
+                        : SizedBox.shrink(),
+              ),
 
-            // Message input field
-            _buildMessageInput(),
-          ],
+              // Message input field
+              _buildMessageInput(),
+            ],
+          ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildHeader() {
     return Obx(() {
       final chat = controller.chat.value;
+      print('DEBUG: Chat object: ${chat?.toJson()}');
+
       final otherUser = chat?.otherUser;
+      print('DEBUG: Other user: ${otherUser?.toJson()}');
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
@@ -124,9 +129,18 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
 
   Widget _buildChatMessages() {
     return Obx(() {
+      // Auto-scroll to latest message
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
       if (controller.isLoading.value && controller.messages.isEmpty) {
         return Center(child: CircularProgressIndicator());
       }
+
+      final messagesList = controller.messages.toList();
+      print('Building message list with ${messagesList.length} messages');
 
       return NotificationListener<ScrollNotification>(
         onNotification: (scrollInfo) {
@@ -139,15 +153,15 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
           return false;
         },
         child: ListView.builder(
-          reverse: true,
+          controller: _scrollController,
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           itemCount:
-              controller.messages.length +
+              messagesList.length +
               (controller.isLoadingMore.value ? 1 : 0),
           itemBuilder: (context, index) {
             // Show loading indicator at the end when loading more
             if (controller.isLoadingMore.value &&
-                index == controller.messages.length) {
+                index == messagesList.length) {
               return Center(
                 child: Padding(
                   padding: EdgeInsets.all(8.0),
@@ -156,7 +170,7 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               );
             }
 
-            final message = controller.messages[index];
+            final message = messagesList[index];
             final isMyMessage =
                 message.senderId == _authController.currentUser.value!.id;
 
@@ -208,6 +222,13 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
   }
 
   Widget _buildTheirMessage(Message message) {
+    // Get the other user from the chat object
+    final otherUser = controller.chat.value?.otherUser;
+    final displayName = otherUser?.displayName ?? 'User';
+    
+    print('DEBUG: Building their message: ${message.toJson()}');
+    print('DEBUG: Using display name: $displayName');
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -221,6 +242,16 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Display sender's name
+              Text(
+                displayName,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 4),
               Text(
                 message.content,
                 style: TextStyle(
@@ -256,19 +287,26 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: TextEditingController(text: controller.messageText.value),
-                      onChanged: controller.onTyping,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Type A Message',
-                        hintStyle: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w300,
+                    child: Obx(() {
+                      // Update the controller text when the observable value changes
+                      if (_messageController.text !=
+                          controller.messageText.value) {
+                        _messageController.text = controller.messageText.value;
+                      }
+                      return TextField(
+                        controller: _messageController,
+                        onChanged: controller.onTyping,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Type A Message',
+                          hintStyle: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ),
                   IconButton(
                     icon: Icon(
@@ -276,9 +314,10 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                       size: 20,
                       color: Colors.black54,
                     ),
-                    onPressed: () {},
+                    onPressed: () => controller.pickFile(),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
+                    tooltip: 'Attach File',
                   ),
                   SizedBox(width: 8),
                   IconButton(
@@ -287,9 +326,10 @@ class ChatDetailScreen extends GetView<ChatDetailController> {
                       size: 20,
                       color: Colors.black54,
                     ),
-                    onPressed: () {},
+                    onPressed: () => controller.takePhoto(),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
+                    tooltip: 'Take Photo',
                   ),
                 ],
               ),

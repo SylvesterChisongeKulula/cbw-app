@@ -30,7 +30,8 @@ class AppPages {
       name: '${AppRoutes.CHAT_DETAIL}/:id',
       page: () => ChatDetailScreen(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<ChatDetailController>(() => ChatDetailController());
+        // Create and dispose controller per route, allow recreation on re-entry
+        Get.lazyPut<ChatDetailController>(() => ChatDetailController(), fenix: true);
       }),
     ),
   ];

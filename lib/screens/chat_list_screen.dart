@@ -129,7 +129,13 @@ class ChatListScreen extends GetView<ChatListController> {
     }
 
     return InkWell(
-      onTap: () => Get.toNamed('${AppRoutes.CHAT_DETAIL}/${chat.id}'),
+      onTap: () {
+        // Pass the chat and otherUser data to the chat detail screen
+        Get.toNamed(
+          '${AppRoutes.CHAT_DETAIL}/${chat.id}',
+          arguments: { 'chat': chat, 'otherUser': otherUser },
+        );
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
@@ -164,22 +170,21 @@ class ChatListScreen extends GetView<ChatListController> {
                         ),
                       ),
                       SizedBox(width: 8),
-                      if (otherUser.isOnline)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                          ),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: otherUser.isOnline ? Colors.green : Colors.grey,
+                          shape: BoxShape.circle,
                         ),
+                      ),
                     ],
                   ),
                   SizedBox(height: 4),
                   Text(
                     lastMessage != null
                         ? (lastMessage.senderId ==
-                                _authController.currentUser.value!.id
+                                _authController.currentUser.value?.id
                             ? 'You: ${lastMessage.content}'
                             : lastMessage.content)
                         : 'Start a conversation',
@@ -310,7 +315,7 @@ class ChatListScreen extends GetView<ChatListController> {
                           .where(
                             (user) =>
                                 user.id !=
-                                _authController.currentUser.value!.id,
+                                _authController.currentUser.value?.id,
                           )
                           .toList();
 
